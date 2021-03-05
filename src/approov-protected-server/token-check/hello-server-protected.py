@@ -1,10 +1,9 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-
-import base64
 
 # @link https://github.com/jpadilla/pyjwt/
 import jwt
+import base64
 
 # @link https://github.com/theskumar/python-dotenv
 from dotenv import load_dotenv, find_dotenv
@@ -47,7 +46,7 @@ async def verifyApproovToken(request: Request, call_next):
     try:
         # Decode the Approov token explicitly with the HS256 algorithm to avoid
         # the algorithm None attack.
-        approov_token_claims = jwt.decode(approov_token, APPROOV_SECRET, algorithms=['HS256'])
+        request.state.approov_token_claims = jwt.decode(approov_token, APPROOV_SECRET, algorithms=['HS256'])
         return await call_next(request)
     except jwt.ExpiredSignatureError as e:
         # You may want to add some logging here.
@@ -55,7 +54,6 @@ async def verifyApproovToken(request: Request, call_next):
     except jwt.InvalidTokenError as e:
         # You may want to add some logging here.
         return JSONResponse({}, status_code = 401)
-
 
 @app.get("/")
 async def root():
