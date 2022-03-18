@@ -36,10 +36,6 @@ app = FastAPI()
 #            verifyApproovToken() middleware.
 @app.middleware("http")
 async def verifyApproovTokenBinding(request: Request, call_next):
-    # Note that the `pay` claim will, under normal circumstances, be present,
-    # but if the Approov failover system is enabled, then no claim will be
-    # present, and in this case you want to return true, otherwise you will not
-    # be able to benefit from the redundancy afforded by the failover system.
     if not 'pay' in request.state.approov_token_claims:
         # You may want to add some logging here.
         return JSONResponse({}, status_code = 401)
