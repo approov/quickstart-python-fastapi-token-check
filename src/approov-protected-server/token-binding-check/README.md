@@ -7,6 +7,7 @@ This Approov integration example is from where the code example for the [Approov
 * [Why?](#why)
 * [How it Works?](#how-it-works)
 * [Requirements](#requirements)
+* [Setup Env File](#setup-env-file)
 * [Try the Approov Integration Example](#try-the-approov-integration-example)
 
 
