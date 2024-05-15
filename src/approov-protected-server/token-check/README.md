@@ -85,7 +85,7 @@ content-type: application/json
 {}
 ```
 
-The reason you got a `401` is because no Approoov token isn't provided in the headers of the request.
+The reason you got a `401` is because no Approoov token is provided in the headers of the request.
 
 Finally, you can test that the Approov integration example works as expected with this [Postman collection](/TESTING.md#testing-with-postman) or with some cURL requests [examples](/TESTING.md#testing-with-curl).
 
