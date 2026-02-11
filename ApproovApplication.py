@@ -17,8 +17,10 @@ from fastapi.responses import JSONResponse, Response
 try:
     from dotenv import load_dotenv
 except ImportError:  # pragma: no cover - optional helper dependency
+
     def load_dotenv() -> bool:
         return False
+
 
 APPROOV_HEADER = "Approov-Token"
 AUTH_HEADER = "Authorization"
@@ -204,7 +206,6 @@ def approov(
     req: Request,
     token_check: bool = True,
     bound_headers: Optional[list[str]] = None,
-    message_signing: bool = False,
 ) -> Optional[str]:
     logger = _approov_logger()
 
@@ -238,7 +239,9 @@ def approov(
 
     if bound_headers:
         pay_claim = claims.get("pay")
-        if pay_claim is None or (isinstance(pay_claim, str) and not _has_text(pay_claim)):
+        if pay_claim is None or (
+            isinstance(pay_claim, str) and not _has_text(pay_claim)
+        ):
             return "[approov] token does not have a 'pay' claim"
         if not isinstance(pay_claim, str):
             return "[approov] token does not have a valid 'pay' claim"
@@ -253,10 +256,9 @@ def approov(
         if not _binding_matches(pay_claim, computed):
             return "[approov] token binding: hash mismatch"
 
-        logger.debug("[approov] token binding verification successful for %s", bound_headers)
-
-    if message_signing:
-        return "[approov] message signing not implemented"
+        logger.debug(
+            "[approov] token binding verification successful for %s", bound_headers
+        )
 
     req.state.approov_claims = claims
     logger.debug("[approov] token verification successful")
@@ -266,7 +268,6 @@ def approov(
 def require_approov(
     *,
     bound_headers: Optional[Iterable[str]] = None,
-    message_signing: bool = False,
 ) -> Callable[[Request], Awaitable[None]]:
     configured_bound_headers = list(bound_headers or [])
 
@@ -280,16 +281,15 @@ def require_approov(
             return
 
         active_bound_headers = (
-            configured_bound_headers
-            if _is_token_binding_enabled(req.app)
-            else []
+            configured_bound_headers if _is_token_binding_enabled(req.app) else []
         )
-        req.state.required_headers = _required_headers_for_request(req, active_bound_headers)
+        req.state.required_headers = _required_headers_for_request(
+            req, active_bound_headers
+        )
         error = approov(
             req,
             token_check=True,
             bound_headers=active_bound_headers,
-            message_signing=message_signing,
         )
         if error is not None:
             _unauthorized_response(req, error)
@@ -425,7 +425,9 @@ def create_app() -> FastAPI:
 
     @app.get("/token-check", dependencies=[Depends(require_approov())])
     async def token_check(req: Request) -> dict[str, Any]:
-        return info_payload(req, "Protected endpoint '/token-check'; Approov token verified.")
+        return info_payload(
+            req, "Protected endpoint '/token-check'; Approov token verified."
+        )
 
     @app.get(
         "/token-binding",
@@ -441,7 +443,9 @@ def create_app() -> FastAPI:
 
     @app.get(
         "/token-double-binding",
-        dependencies=[Depends(require_approov(bound_headers=[AUTH_HEADER, SESSION_ID_HEADER]))],
+        dependencies=[
+            Depends(require_approov(bound_headers=[AUTH_HEADER, SESSION_ID_HEADER]))
+        ],
     )
     async def token_double_binding(req: Request) -> dict[str, Any]:
         response = info_payload(
@@ -449,7 +453,9 @@ def create_app() -> FastAPI:
             "Protected endpoint '/token-double-binding'; dual token binding enforced.",
         )
         response["authorizationHeaderPresent"] = _has_text(req.headers.get(AUTH_HEADER))
-        response["sessionIdHeaderPresent"] = _has_text(req.headers.get(SESSION_ID_HEADER))
+        response["sessionIdHeaderPresent"] = _has_text(
+            req.headers.get(SESSION_ID_HEADER)
+        )
         return response
 
     return app

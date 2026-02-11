@@ -1,0 +1,26 @@
+.git
+.gitignore
+
+# Secrets and local environment files
+.env
+.env.*
+
+# Python virtualenvs and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local logs and tooling output
+.config/
+*.log
+
+# Editor/OS files
+.vscode/
+.idea/
+.DS_Store
