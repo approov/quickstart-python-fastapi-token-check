@@ -9,17 +9,17 @@ This project provides a server-side example of Approov token verification for a 
 
 In this example, Approov token checks are implemented in `ApproovApplication.py`. The responsibilities break down as follows:
 
-- **JWT Approov token validation (signature + expiry)** is implemented in [approov()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L205-L265). It verifies the HS256 signature and rejects tokens that are missing, expired, or invalid (`exp` is enforced).
+1. **JWT Approov token validation (signature + expiry)** is implemented in [approov()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L205-L265). It verifies the HS256 signature and rejects tokens that are missing or past `exp`.
 
-- **Token binding (`pay` + hash)** is handled by [approov()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L240-L257), with [_build_token_binding_string()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L155-L168), [_sha256_b64url_from_str()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L171-L173), and [_binding_matches()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L176-L179). It computes `base64url(sha256(binding_value))` and compares it to `pay` using constant-time comparison.
+2. **Token binding (`pay` + hash)** is handled by [bound_headers](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L240-L257), with [_build_token_binding_string()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L155-L168), [_sha256_b64url_from_str()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L171-L173), and [_binding_matches()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L176-L179). It computes `base64url(sha256(binding_value))` and compares it to `pay` using constant-time comparison.
 
-- **Request enforcement** is done by [require_approov()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L268-L299), [_unauthorized_response()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L199-L202), [ApproovUnauthorized](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L40-L43), and its exception handler in [create_app()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L371-L375). Requests without a valid token or binding are rejected with `401 Unauthorized`.
+3. **Request enforcement** is done by [require_approov()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L268-L299), [_unauthorized_response()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L199-L202), [ApproovUnauthorized](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L40-L43), and its exception handler in [create_app()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L371-L375). Requests without a valid token or binding are rejected with `401 Unauthorized`.
 
-- **Binding value selection (what gets hashed)** is in route dependencies for [`/token-binding` and `/token-double-binding`](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L432-L449), and assembled by [_build_token_binding_string()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L155-L168). It uses `Authorization` for single binding, or `Authorization` + `SessionId` for double binding.
+4. **Binding value selection (what gets hashed)** is in route dependencies for [`/token-binding` and `/token-double-binding`](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L432-L449), and assembled by [_build_token_binding_string()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L155-L168). It uses `Authorization` for single binding, or `Authorization` + `SessionId` for double binding.
 
-- **Protected route requirements** are defined by [`Depends(require_approov(...))` on protected endpoints](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L426-L448).
+5. **Protected route requirements** are defined by [`Depends(require_approov(...))` on protected endpoints](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L426-L448).
 
-- **Protected routes are registered** in [create_app()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L359-L461).
+6. **Protected routes are registered** in [create_app()](https://github.com/approov/quickstart-python-fastapi-token-check/blob/refactor/python-fastapi-quickstart/ApproovApplication.py#L359-L461).
 
 ## Approov Token Verification Flow
 
@@ -237,7 +237,7 @@ curl -X GET http://localhost:8080/approov-state       # check current state
 **Environments where the quickstart was tested:**
 ```text
 * Runtime: Python 3.12.12
-* Framework: Flask 3.1.2
+* Framework: FastAPI 0.128.7
 * Build Tool: pip 26.0.1 
 ```
 
